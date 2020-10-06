@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"fmt"
 	m "itchat4go/model"
 	"log"
 	"os"
@@ -31,12 +32,12 @@ func (s *Scheduler) Run() {
 	s.C.Start()
 }
 
-func (s *Scheduler) InitJob(loginMap m.LoginMap, users []string) {
+func (s *Scheduler) InitJob(loginMap m.LoginMap, users []string, testUsers []string) {
 	var err error
-	_, err = s.C.AddFunc("* * * * *", func() {
-		err = wechat.WechatSendMsgs("每分钟定时测试", users, loginMap)
+	_, err = s.C.AddFunc(config.Config.GetString("cron.spec"), func() {
+		err = wechat.WechatSendMsgs(fmt.Sprintf("保活 %s", time.Now().String()), testUsers, loginMap)
 		if err != nil {
-			log.Printf("每分钟定时任务 - 发送微信消息发生错误 err: %v\n", err)
+			log.Printf("定时任务 - 发送微信消息发生错误 err: %v\n", err)
 			return
 		}
 	})

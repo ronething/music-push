@@ -48,9 +48,10 @@ func main() {
 		return
 	}
 	users := wechat.GetSendUsers(loginMap, config.Config.GetStringSlice("cron.push"))
+	testUsers := wechat.GetSendUsers(loginMap, config.Config.GetStringSlice("cron.test"))
 
 	scheduler := server.NewScheduler()
-	scheduler.InitJob(loginMap, users)
+	scheduler.InitJob(loginMap, users, testUsers)
 	scheduler.Run()
 
 	c := make(chan os.Signal, 1)
