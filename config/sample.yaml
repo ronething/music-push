@@ -1,0 +1,8 @@
+netease:
+  host: http://127.0.0.1:8999
+
+# 输入 uin
+cron:
+  spec: "*/30 * * * *"
+  push:
+    - "xxx" # 测试群
