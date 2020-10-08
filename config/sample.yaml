@@ -3,6 +3,14 @@ netease:
 
 # 输入 uin
 cron:
-  spec: "*/30 * * * *"
   push:
-    - "xxx" # 测试群
+    spec: "*/30 * * * *"
+    pre: "2020-10-08"
+    user:
+      - "xxx" # 测试群
+  keepalived:
+    spec: "*/2 * * * *"
+  notice: # 通知一波
+    spec: "*/30 * * * *"
+    user:
+      - "xxx"

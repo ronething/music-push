@@ -32,17 +32,27 @@ func (s *Scheduler) Run() {
 	s.C.Start()
 }
 
-func (s *Scheduler) InitJob(loginMap m.LoginMap, users []string, testUsers []string) {
+func (s *Scheduler) InitJob(loginMap m.LoginMap, users []string, noticeUsers []string) {
 	var err error
-	_, err = s.C.AddFunc(config.Config.GetString("cron.spec"), func() {
-		err = wechat.WechatSendMsgs(fmt.Sprintf("保活 %s", time.Now().String()), testUsers, loginMap)
+	_, err = s.C.AddFunc(config.Config.GetString("cron.keepalived.spec"), func() {
+		err = wechat.WechatSendMsg(fmt.Sprintf("keepalive %s", time.Now().String()),
+			"filehelper", loginMap)
 		if err != nil {
 			log.Printf("定时任务 - 发送微信消息发生错误 err: %v\n", err)
 			return
 		}
 	})
-	n := NetEaseRank{}
-	_, err = s.C.AddFunc(config.Config.GetString("cron.spec"), func() {
+	_, err = s.C.AddFunc(config.Config.GetString("cron.notice.spec"), func() {
+		err = wechat.WechatSendMsgs(fmt.Sprintf("notice %s", time.Now().String()), noticeUsers, loginMap)
+		if err != nil {
+			log.Printf("notice 定时任务 - 发送微信消息发生错误 err: %v\n", err)
+			return
+		}
+	})
+	n := NetEaseRank{ // pre init
+		Pre: config.Config.GetString("cron.push.pre"),
+	}
+	_, err = s.C.AddFunc(config.Config.GetString("cron.push.spec"), func() {
 		now := time.Now().Format("2006-01-02")
 		if n.Pre == now {
 			log.Printf("当天已经推送过了")

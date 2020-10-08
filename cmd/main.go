@@ -47,11 +47,11 @@ func main() {
 		log.Printf("登录微信发生错误, err: %v", err)
 		return
 	}
-	users := wechat.GetSendUsers(loginMap, config.Config.GetStringSlice("cron.push"))
-	testUsers := wechat.GetSendUsers(loginMap, config.Config.GetStringSlice("cron.test"))
+	users := wechat.GetSendUsers(loginMap, config.Config.GetStringSlice("cron.push.user"))
+	noticeUsers := wechat.GetSendUsers(loginMap, config.Config.GetStringSlice("cron.notice.user"))
 
 	scheduler := server.NewScheduler()
-	scheduler.InitJob(loginMap, users, testUsers)
+	scheduler.InitJob(loginMap, users, noticeUsers)
 	scheduler.Run()
 
 	c := make(chan os.Signal, 1)
