@@ -51,6 +51,7 @@ type NetEasePlayList struct {
 	Name                  string          `json:"name"`
 	ID                    int             `json:"id"`
 	ShareCount            int             `json:"shareCount"`
+	UpdateTime            int64           `json:"updateTime"`
 	CoverImgIDStr         string          `json:"coverImgId_str"`
 	CommentCount          int             `json:"commentCount"`
 }
@@ -77,7 +78,7 @@ func (n *NetEaseRank) GetTop10() (string, error) {
 
 	var length int
 	var tracks []NetEaseTracks
-	updateTime := time.Unix(p.Playlist.TrackUpdateTime/1000, 0)
+	updateTime := time.Unix(p.Playlist.UpdateTime/1000, 0)
 	update := updateTime.Format("2006-01-02")
 	now := time.Now().Format("2006-01-02")
 	log.Printf("update is %v, now is %v, n.Pre is %v\n,", update, now, n.Pre)
