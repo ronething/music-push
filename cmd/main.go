@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/ronething/music-push/config"
-	"github.com/ronething/music-push/pkg/wechat"
 	"github.com/ronething/music-push/server"
 )
 
@@ -41,17 +40,8 @@ func main() {
 	// 设置配置文件和静态变量
 	config.SetConfig(filePath)
 
-	// 登录微信
-	err, loginMap := wechat.WechatLogin()
-	if err != nil {
-		log.Printf("登录微信发生错误, err: %v", err)
-		return
-	}
-	users := wechat.GetSendUsers(loginMap, config.Config.GetStringSlice("cron.push.user"))
-	noticeUsers := wechat.GetSendUsers(loginMap, config.Config.GetStringSlice("cron.notice.user"))
-
 	scheduler := server.NewScheduler()
-	scheduler.InitJob(loginMap, users, noticeUsers)
+	scheduler.InitJob()
 	scheduler.Run()
 
 	c := make(chan os.Signal, 1)

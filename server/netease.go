@@ -81,7 +81,7 @@ func (n *NetEaseRank) GetTop10() (string, error) {
 	updateTime := time.Unix(p.Playlist.UpdateTime/1000, 0)
 	update := updateTime.Format("2006-01-02")
 	now := time.Now().Format("2006-01-02")
-	log.Printf("update is %v, now is %v, n.Pre is %v\n,", update, now, n.Pre)
+	log.Printf("update is %v, now is %v, n.Pre is %v\n", update, now, n.Pre)
 	if now != update || n.Pre == now { // 要么是不是当天，要么就已经是更新过了的
 		return "", errors.New("get top 10 err")
 	}

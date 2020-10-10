@@ -2,15 +2,12 @@ package server
 
 import (
 	"context"
-	"fmt"
-	m "itchat4go/model"
 	"log"
 	"os"
 	"time"
 
 	"github.com/robfig/cron/v3"
 	"github.com/ronething/music-push/config"
-	"github.com/ronething/music-push/pkg/wechat"
 )
 
 type Scheduler struct {
@@ -32,27 +29,12 @@ func (s *Scheduler) Run() {
 	s.C.Start()
 }
 
-func (s *Scheduler) InitJob(loginMap m.LoginMap, users []string, noticeUsers []string) {
+func (s *Scheduler) InitJob() {
 	var err error
-	_, err = s.C.AddFunc(config.Config.GetString("cron.keepalived.spec"), func() {
-		err = wechat.WechatSendMsg(fmt.Sprintf("keepalive %s", time.Now().String()),
-			"filehelper", loginMap)
-		if err != nil {
-			log.Printf("定时任务 - 发送微信消息发生错误 err: %v\n", err)
-			return
-		}
-	})
-	_, err = s.C.AddFunc(config.Config.GetString("cron.notice.spec"), func() {
-		err = wechat.WechatSendMsgs(fmt.Sprintf("notice %s", time.Now().String()), noticeUsers, loginMap)
-		if err != nil {
-			log.Printf("notice 定时任务 - 发送微信消息发生错误 err: %v\n", err)
-			return
-		}
-	})
 	n := NetEaseRank{ // pre init
-		Pre: config.Config.GetString("cron.push.pre"),
+		Pre: config.Config.GetString("webhook.pre"),
 	}
-	_, err = s.C.AddFunc(config.Config.GetString("cron.push.spec"), func() {
+	if _, err = s.C.AddFunc(config.Config.GetString("webhook.spec"), func() {
 		now := time.Now().Format("2006-01-02")
 		if n.Pre == now {
 			log.Printf("当天已经推送过了")
@@ -63,13 +45,25 @@ func (s *Scheduler) InitJob(loginMap m.LoginMap, users []string, noticeUsers []s
 			log.Printf("获取排行榜失败, err: %v\n", err)
 			return
 		}
-		err = wechat.WechatSendMsgs(res, users, loginMap)
-		if err != nil {
-			log.Printf("云音乐排行榜任务 - 发送微信消息发生错误 err: %v\n", err)
-			return
+		// webhook post
+		feishuHooks := config.Config.GetStringSlice("webhook.feishu")
+		success := 0 // 计数
+		failed := 0
+		for i := 0; i < len(feishuHooks); i++ {
+			f := NewFeiShu(feishuHooks[i])
+			if err = f.Send(res); err != nil {
+				log.Printf("推送发生 err: %v\n", err)
+				failed += 1
+			} else {
+				success += 1
+			}
 		}
+		log.Printf("推送成功: %v, 推送失败: %v\n", success, failed)
 		n.Pre = now // 设置标志
-	})
+	}); err != nil {
+		log.Printf("添加任务失败, err: %v\n", err)
+		return
+	}
 }
 
 func (s *Scheduler) Stop() context.Context {
