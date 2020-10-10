@@ -1,16 +1,9 @@
 netease:
   host: http://127.0.0.1:8999
 
-# 输入 uin
-cron:
-  push:
-    spec: "*/30 * * * *"
-    pre: "2020-10-08"
-    user:
-      - "xxx" # 测试群
-  keepalived:
-    spec: "*/2 * * * *"
-  notice: # 通知一波
-    spec: "*/30 * * * *"
-    user:
-      - "xxx"
+# 遍历发送
+webhook:
+  pre: "2020-10-10"
+  spec: "* * * * *"
+  feishu:
+    - "https://open.feishu.cn/open-apis/bot/v2/hook/xxxxxx"
